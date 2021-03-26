@@ -17,7 +17,10 @@ Function setup:
     configure the visualizer
 
 Function run:
-    Run the simulation
+    Run the simulation (solve relevant constraints and alow motion to happen)
+
+Function reset:
+    Resets the simulation to the original 
 
 '''
 
@@ -32,7 +35,7 @@ class PyBulletEnv:
         p.setGravity(0, 0, -9.8)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setAdditionalSearchPath(os.getcwd()+"data/") # So we can render custom shapes directly!
-        # Make an infinite floor!
+        # Make a floor surface so we can put stuff on it 
         p.loadURDF("plane100.urdf", useMaximalCoordinates=True)
 
         #disable rendering during creation.
@@ -53,13 +56,28 @@ class PyBulletEnv:
         p.setRealTimeSimulation(1)
         while(1):
             time.sleep(1./240.)
-            #camInfo = p.getDebugVisualizerCamera()
-            #viewMat = camData[2]
-            #projMat = camData[3]
+
+
+    def run_dynamic(self, IDArray):
+        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
+        p.setRealTimeSimulation(1)
+        while(1):
+            time.sleep(1./120.)
+            camInfo = p.getDebugVisualizerCamera()
+            distance_from_origin = camInfo[-2]
+            maxdist = 25
+            bias = -7
+            toVis = 0 if distance_from_origin > maxdist else min(len(IDArray)-1, int(maxdist/(distance_from_origin + bias)))
+            #print(toVis)
+            for i, val in enumerate(IDArray):
+                if i == toVis:
+                    p.changeVisualShape(val, -1, rgbaColor= [1, 1, 1, 1])
+                else:
+                    p.changeVisualShape(val, -1, rgbaColor = [1, 1, 1, 0])
 
 
     def analyze(self, obj, IDArray):
-        cameraPos = np.array((0, 0, 0))
+        cameraPos = np.array((0, 0, 0)) # TODO: If we'd had the dynamic solution working, we could have had this  
         distances = []
         positions = []
 
@@ -71,13 +89,12 @@ class PyBulletEnv:
             positions.append(pos)
             distances.append(np.linalg.norm(cameraPos - np.array((x, y, z))))
 
+        # Each value should be a percentage of the furthest one
         norm = [float(i)/max(distances) for i in distances]
         
-        #print(norm)
         # Replace all the old objects with new ones!
         for i, val in enumerate(IDArray):
             decRatio = max(round(1.0 - norm[i], 2), 0.1) # Don't want to decimate to any less than 10% of the origial faces
-            #print(decRatio)
             p.removeBody(val)
             obj.createObjectURDF(positions[i], decRatio)
         return

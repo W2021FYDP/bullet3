@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     for i in range(10):
         # For fun, try adding another 0!
-        deer.createObjectObj([i, 0, 0], (i+1)/1000)
+        deer.createObjectObj([i, 0, 0], (i+1)/10000)
 
-    deer.createObjectURDF([0, 4, 0], orient=[0, 0, 0, 1])
+    #deer.createObjectURDF([0, 4, 0], orient=[0, 0, 0, 1])
     env.run()

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     ball.createObjectObj([0, 0, 0])
     ball.createObjectObj([0, 1, 0], 0.1)
     ball.createObjectObj([0, 2, 0], 0.001)
-    hoop.createObjectURDF([0, 0, 5], orient= [0, 0, 0, 1])
+    hoop.createObjectURDF([-10, 0, 5], orient= [0, 0, 0, 1])
 
     env.run()
 

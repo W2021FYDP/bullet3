@@ -122,4 +122,7 @@ class Obj():
         p.resetBasePositionAndOrientation(self.obj, pos, orientation)
 
 
+    def makeTransparent(self, myID):
+        p.changeVisualShape(myID, -1, rgbaColor = [0, 0, 0, 0])
+
 
