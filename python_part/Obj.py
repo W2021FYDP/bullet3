@@ -6,6 +6,15 @@ import PyBulletEnv
 
 MINIMIZER = 'minimizeWithBlendr.py'
 
+'''
+Class Obj:
+Create an object that the simulation will then act upon. 
+Facilitates object deprication and stores previously depricated versions. 
+
+Author: Stacy Gaikovaia 
+
+'''
+
 class Obj():
     
     def __init__(self, fn, scale=1):
@@ -34,16 +43,13 @@ class Obj():
 
         ps = subprocess.Popen(["blender", "-b", "-P", MINIMIZER, "--", str(ratio), self.filename], stdout = subprocess.PIPE)
         output = subprocess.check_output(["grep", "after decimation"], stdin = ps.stdout)
-        print(output)
-        # Parse output to find new stats 
-        # Find verts, edges, polys
+        print(output) # So we know that a new object has been created and stored 
         self.decims[ratio] = output_file
         return output_file
     
     def toURDF(self, filename, ratio):
         path = os.path.dirname(self.filename)
         builder = object2urdf.ObjectUrdfBuilder(path)
-        # print("FILENAME IS " + filename)
         builder.build_urdf(filename=filename, output_folder=path+"/"+str(ratio)+"/", force_overwrite=True, decompose_concave=False, force_decompose =False, center = "bottom")
 #        p.loadURDF("data/cow/data.urdf", globalScaling=self.scale, useFixedBase=True, basePosition = [0, 1, 2.7], baseOrientation=[1,1,1,1])
         return filename + ".urdf"
@@ -52,15 +58,15 @@ class Obj():
         '''
         Function createObjectObj
 
-        Creates an instance of the relevant obj file and adds it to the object instances dictionairy 
+        Creates an instance of the relevant obj file decimated by the input ratio, 
+        and adds it to the object instances dictionairy. Returns default object for ratios > 1.
         '''
         if ratio in self.decims:
             file_to_load = self.decims[ratio]
         else: 
             file_to_load = self.smaller(ratio)
-        #_, suff = self.filename.split('.')
-        #if suff == "obj":
-            # creating an obj
+
+
         visualShapeID = p.createVisualShape(
             shapeType = p.GEOM_MESH,
             fileName = file_to_load,
@@ -84,9 +90,6 @@ class Obj():
             baseCollisionShapeIndex=collisionShapeID,
             baseVisualShapeIndex=visualShapeID,
             basePosition = position,
-            # useMaximalCoordinates=True,
-        #    baseOrientation = orn
-            #useFixedBase = True
         )
 
     def printDecims(self):
@@ -100,26 +103,18 @@ class Obj():
             file_to_load = self.smaller(ratio)
         return p.loadURDF(self.toURDF(file_to_load, ratio), globalScaling=self.scale, useFixedBase=True, basePosition = position, baseOrientation=orient)  
 
-    def move_x_y(self, x, y):
-        if self.obj == None: 
-            # TODO: Set up as an error
-            print("Object not initialized!")
-            return -1 
+    def move_x_y(self, x, y, objID):
         #else, obj is a unique ID!
-        pos, orient = p.getBasePositionAndOrientation(self.obj)
+        pos, orient = p.getBasePositionAndOrientation(objID)
         _, _, oldZ = pos
-        p.resetBasePositionAndOrientation(self.obj, [x, y, oldZ], orient)
+        p.resetBasePositionAndOrientation(objID, [x, y, oldZ], orient)
         
         
-    def change_position(self,roll, pitch, yaw):
-        if self.obj == None:
-            print("Object not initialized!")
-            return -1
-
-        # Otherwise, change it's position :) 
-        pos, _ = p.getBasePositionAndOrientation(self.obj)
+    def change_position(self,roll, pitch, yaw, objID):
+        # Change object's position
+        pos, _ = p.getBasePositionAndOrientation(objID)
         orientation = p.getQuaternionFromEuler([roll, pitch, yaw])
-        p.resetBasePositionAndOrientation(self.obj, pos, orientation)
+        p.resetBasePositionAndOrientation(objID, pos, orientation)
 
 
     def makeTransparent(self, myID):

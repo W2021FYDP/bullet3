@@ -12,6 +12,8 @@ Run as `blender -b -P minimizeWithBlendr.py -- <ratio> <obj location>`
 
 Author: Stacy Gaikovaia 
 
+All class methods are helpers, should not be instantiated directly! 
+
 '''
 class MeshDecimator:
     def __init__(self):

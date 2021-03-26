@@ -11,7 +11,6 @@ obj classes that have so far been instantiated.
 
 Author: Stacy Gaikovaia 
 
-
 Function setup:
     Initialize the GUI, set the gravity, add information into the search path,
     configure the visualizer
@@ -20,8 +19,13 @@ Function run:
     Run the simulation (solve relevant constraints and alow motion to happen)
 
 Function reset:
-    Resets the simulation to the original 
+    Resets the simulation to all the initial values
 
+Function numBodies:
+    Returns the number of bodies in the scene
+
+Function run_dynamic:
+    Runs a dynamic demo with dynamic deprication based on camera distance. Requires an array of objects to operate on. 
 '''
 
 class PyBulletEnv:
